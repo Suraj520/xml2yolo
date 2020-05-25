@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 from xml.dom import minidom
@@ -5,7 +6,7 @@ import os
 import glob
 
 lut={}
-lut["face"]=0
+lut["head"]=0
 lut["face_mask"]=1
 
 
@@ -26,41 +27,34 @@ def convert_coordinates(size, box):
 def convert_xml2yolo( lut ):
 
     for fname in glob.glob("*.xml"):
-        
         xmldoc = minidom.parse(fname)
-        
         fname_out = (fname[:-4]+'.txt')
 
         with open(fname_out, "w") as f:
             try:
-		    itemlist = xmldoc.getElementsByTagName('object')
-		    size = xmldoc.getElementsByTagName('size')[0]
-		    width = int((size.getElementsByTagName('width')[0]).firstChild.data)
-		    height = int((size.getElementsByTagName('height')[0]).firstChild.data)
-
-		    for item in itemlist:
-		        # get class label
-		        classid =  (item.getElementsByTagName('name')[0]).firstChild.data
-		        if classid in lut:
-		            label_str = str(lut[classid])
-		        else:
-		            label_str = "-1"
-		            print ("warning: label '%s' not in look-up table" % classid)
+                    itemlist = xmldoc.getElementsByTagName('object')
+                    size = xmldoc.getElementsByTagName('size')[0]
+                    width = int((size.getElementsByTagName('width')[0]).firstChild.data)
+                    height = int((size.getElementsByTagName('height')[0]).firstChild.data)
+                    for item in itemlist:
+                        classid =  (item.getElementsByTagName('name')[0]).firstChild.data
+                        if classid in lut:
+                           label_str = str(lut[classid])
+                        else:
+                            label_str = "-1"
+                            print ("warning: label '%s' not in look-up table" % classid)
 
 		        # get bbox coordinates
-		        xmin = ((item.getElementsByTagName('bndbox')[0]).getElementsByTagName('xmin')[0]).firstChild.data
-		        ymin = ((item.getElementsByTagName('bndbox')[0]).getElementsByTagName('ymin')[0]).firstChild.data
-		        xmax = ((item.getElementsByTagName('bndbox')[0]).getElementsByTagName('xmax')[0]).firstChild.data
-		        ymax = ((item.getElementsByTagName('bndbox')[0]).getElementsByTagName('ymax')[0]).firstChild.data
-		        b = (float(xmin), float(xmax), float(ymin), float(ymax))
-		        bb = convert_coordinates((width,height), b)
-		        #print(bb)
-
-		        f.write(label_str + " " + " ".join([("%.6f" % a) for a in bb]) + '\n')
-
-			print ("wrote %s" % fname_out)
+                        xmin = ((item.getElementsByTagName('bndbox')[0]).getElementsByTagName('xmin')[0]).firstChild.data
+                        ymin = ((item.getElementsByTagName('bndbox')[0]).getElementsByTagName('ymin')[0]).firstChild.data
+                        xmax = ((item.getElementsByTagName('bndbox')[0]).getElementsByTagName('xmax')[0]).firstChild.data
+                        ymax = ((item.getElementsByTagName('bndbox')[0]).getElementsByTagName('ymax')[0]).firstChild.data
+                        b = (float(xmin), float(xmax), float(ymin), float(ymax))
+                        bb = convert_coordinates((width,height), b)
+                        f.write(label_str + " " + " ".join([("%.6f" % a) for a in bb]) + '\n')
+                        print ("wrote %s" % fname_out)
             except:
-		continue
+               continue
 
 
 
